@@ -1,0 +1,72 @@
+﻿
+<link href="./contents/Site.css" rel="stylesheet" type="text/css" />
+<script src="./Scripts/bt_1000.js" type="text/javascript"></script>
+<script src="./Scripts/soapclient.js" type="text/javascript"></script>
+<script src="./Scripts/slp_ht.js" type="text/javascript" charset="Shift_JIS"></script>
+<script type="text/javascript">
+
+    window.onload = function () {
+    
+    if (document.addEventListener) {
+        document.addEventListener("keypress", { para: MyPage, handleEvent: document_KeyPress }, false);
+        //document.addEventListener("keypress", document_KeyPress, false);
+    }
+    //{name: userName, handleEvent: sayHello}
+    else {
+        document.attachEvent("onkeypress", { para: MyPage, handleEvent: document_KeyPress });
+        //document.attachEvent("onkeypress", document_KeyPress);
+    }
+
+    //FKeyガイド表示
+    var aElementCollection = document.getElementsByTagName("A");
+
+    for (var i = 0; i < aElementCollection.length; i++) {
+        if (aElementCollection[i].addEventListener) {
+            aElementCollection[i].addEventListener("click", Ht.LoadPage, false);
+            aElementCollection[i].addEventListener("focus", a_Focus, false);
+        }
+        else {
+            aElementCollection[i].attachEvent("onclick", Ht.LoadPage);
+            aElementCollection[i].attachEvent("onfocus", a_Focus);
+        }
+    }
+
+    var inputElementCollection = document.getElementsByTagName("INPUT");
+
+    for (var i = 0; i < inputElementCollection.length; i++) {
+        if (inputElementCollection[i].addEventListener) {
+            inputElementCollection[i].addEventListener("focus", input_Focus, false);
+        }
+        else {
+            inputElementCollection[i].attachEvent("onfocus", input_Focus);
+        }
+    }
+
+    var objMain = document.getElementById("main");
+    var objInput = main.getElementsByTagName("input");
+
+    if(objInput.length > 0)
+    {
+        for (var i = 0; i < objInput.length; i++) {
+            if (objInput[i].type != "hidden" && objInput[i].disabled == false && objInput[i].readOnly == false) {
+                objInput[i].focus();
+
+                return;
+            }
+        }
+    }else
+    {
+        var objA = main.getElementsByTagName("a");
+
+        for (var i = 0; i < objA.length; i++) {
+            objA[i].focus();
+
+            return;
+        }
+    }
+
+}
+function Redirect(KeyID) {
+    location.href = url[KeyID];
+}
+</script>

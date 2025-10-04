@@ -1,0 +1,27 @@
+<html>
+<head>
+<script type="text/javascript">
+function test_1(){
+	window.alert(document.domain);
+}
+
+function test_2(){
+	window.alert(window.location.hostname);
+}
+
+function test_3(){
+	window.alert(window.location.port);
+}
+
+function test_4(){
+	window.alert(window.location.host);
+}
+</script>
+</head>
+<body>
+<input type="button" value="test1" onClick="test_1()"></br>
+<input type="button" value="test2" onClick="test_2()"></br>
+<input type="button" value="test3" onClick="test_3()"></br>
+<input type="button" value="test4" onClick="test_4()"></br>
+</body>
+</html>

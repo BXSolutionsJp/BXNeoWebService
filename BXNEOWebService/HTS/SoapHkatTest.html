@@ -1,0 +1,61 @@
+
+
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head><link href="./contents/Site.css" rel="stylesheet" type="text/css" />
+<script src="./Scripts/bt_1000.js" type="text/javascript"></script>
+<script src="./Scripts/soapclient.js" type="text/javascript"></script>
+<script src="./Scripts/slp_ht.js" type="text/javascript" charset="Shift_JIS"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><title>SOAP TEST</title>
+<script type="text/javascript">
+
+
+function ChkJanCode(){
+	var JanCode = document.getElementById("JAN").value;
+	
+		window.alert(JanCode);	
+    var url = "http://192.168.6.7/BxHt/BXSoap.asmx";
+//    var url = "http://192.168.6.7/SlpWebService/HT.asmx";
+    
+		
+    var pl = new SOAPClientParameters();
+    	
+    //pl.add("shnCd", JanCode);
+    pl.add("JanCode", JanCode);
+    	
+    SOAPClient.invoke(url, "getHKAT", pl, false, SOAP_callBack);
+    	
+}    
+function SOAP_callBack(r) {
+	
+	console.log(JSON.stringify(r));
+	console.log(r);
+	
+    if (r == null) {
+    	window.alert("NoData");
+        window.alert("無効な担当コードです。");        
+
+        return;
+    }
+	
+	
+	
+	window.alert(r.length);
+	
+
+}   
+ 
+    
+</Script>
+</head>
+<body>
+
+<Input Type="TEXT" NAME="JAN" inputmode="key_sftoff_f3sft" ID="JAN" value="4537694275842">
+<INPUT TYPE="BUTTON" VALUE="GO SOAP" onClick="ChkJanCode()">
+
+
+</body>
+</html>
+
