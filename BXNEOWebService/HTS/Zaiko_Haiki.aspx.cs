@@ -6,6 +6,7 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.Data;
 using Oracle.ManagedDataAccess.Client;
+using NpgsqlTypes;
 
 namespace BXWebService.HTS
 {
@@ -23,16 +24,16 @@ namespace BXWebService.HTS
             {
                 tantoEncode = Request.QueryString["TANTO_CD"];
 
-                cls_OraIf Ora = new cls_OraIf();
+                cls_PgsqlIf Pg = new cls_PgsqlIf();
                 try
                 {
-                    if (!Ora.Connect()) throw new Exception("Oracle Connection Error");
+                    if (!Pg.Connect()) throw new Exception("Oracle Connection Error");
                     string　sql = "SELECT SOKO_CD FROM TANTO WHERE TANTO_CD = :TANTO_CD";
 
-                    Ora.setSqlCmd(sql, CommandType.Text);
-                    Ora.addParam(ParameterDirection.Input, "TANTO_CD", Oracle.ManagedDataAccess.Client.OracleDbType.Varchar2, tantoEncode, 8);
+                    Pg.setSqlCmd(sql, CommandType.Text);
+                    Pg.addParam(ParameterDirection.Input, "TANTO_CD", NpgsqlDbType.Varchar, tantoEncode, 8);
 
-                    SOKO = Ora.getDirectValue();
+                    SOKO = Pg.getDirectValue();
                 }
                 catch(Exception ex)
                 {
@@ -40,7 +41,7 @@ namespace BXWebService.HTS
                 }
                 finally
                 {
-                    Ora.Disconnect();
+                    Pg.Disconnect();
                 }
             }
         }

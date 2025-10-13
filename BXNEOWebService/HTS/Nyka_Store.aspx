@@ -81,6 +81,7 @@
 <input type="hidden" id="f2Action" value="" />
 <input type="hidden" id="f3Action" value="" />
         <div id="footer">
+            <a href="Zaiko_Move.aspx">Zaiko_Move.aspx</a>
             <ul class="fkeyguide">
                 <li class="keyNum"><span>F1</span></li>
                 <li id="KeyF1" class="keydesc">&nbsp;</li>

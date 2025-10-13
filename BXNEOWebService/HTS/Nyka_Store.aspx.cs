@@ -5,6 +5,7 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.Data;
+using NpgsqlTypes;
 
 namespace BXWebService.HTS
 {
@@ -50,21 +51,21 @@ namespace BXWebService.HTS
                                 "AND(HKATSHIJI.STS BETWEEN   KOTEIPROC.MIN_STS AND KOTEIPROC.MAX_STS) " +
                                 "AND KOTEIPROC.PROC_KBN = 'H' ";
                                
-            cls_OraIf Ora = new cls_OraIf();
+            cls_PgsqlIf Pg = new cls_PgsqlIf();
             DataTable dt = new DataTable();
 
             try
             {
-                if (!Ora.Connect())
+                if (!Pg.Connect())
                 {
                     throw new Exception("Oracle Connection Error");
                 }
 
-                Ora.removeSqlParam();
-                Ora.setSqlCmd(sql, CommandType.Text);
-                Ora.addParam(ParameterDirection.Input, "HKAT_SHIJI_NO", Oracle.ManagedDataAccess.Client.OracleDbType.Varchar2, HKAT_SHIJI_NO, 15);
+                Pg.removeSqlParam();
+                Pg.setSqlCmd(sql, CommandType.Text);
+                Pg.addParam(ParameterDirection.Input, "HKAT_SHIJI_NO", NpgsqlDbType.Varchar, HKAT_SHIJI_NO, 15);
                 
-                dt = Ora.cmdExecDt();
+                dt = Pg.cmdExecDt();
                 if (dt.Rows.Count > 0)
                 {
                     QTY = dt.Rows[0]["QTY"].ToString();
@@ -72,8 +73,8 @@ namespace BXWebService.HTS
                     KYK_SHN_CD = dt.Rows[0]["KYK_SHN_CD"].ToString();
                     ZK_KANRI = dt.Rows[0]["ZK_KANRI"].ToString();
                     KOZA = dt.Rows[0]["KOZA"].ToString();
-                    setListBox(ref Ora, KOZA);
-                    LocListBox(ref Ora, KOZA, dt.Rows[0]["IRI_SOKO_KANRI_CD"].ToString());
+                    setListBox(ref Pg, KOZA);
+                    LocListBox(ref Pg, KOZA, dt.Rows[0]["IRI_SOKO_KANRI_CD"].ToString());
                 }
             }
             catch (Exception ex)
@@ -82,16 +83,16 @@ namespace BXWebService.HTS
             }
             finally
             {
-                Ora.Disconnect();
+                Pg.Disconnect();
             }
 
         }
-        private void setListBox(ref cls_OraIf Ora,  string Koza)
+        private void setListBox(ref cls_PgsqlIf Pg,  string Koza)
         {
             string sql = "SELECT KOZA, KOZA_NM FROM KOZA ORDER BY KOZA";
             DataTable li = new DataTable();
-            Ora.setSqlCmd(sql, CommandType.Text);
-            Ora.ExecuteCmd(ref li);
+            Pg.setSqlCmd(sql, CommandType.Text);
+            Pg.ExecuteCmd(ref li);
             
             for (int i= 0; i<li.Rows.Count; i++)
             {
@@ -103,7 +104,7 @@ namespace BXWebService.HTS
                 KOZA_Selet += ">" + li.Rows[i]["KOZA"] + ":" + li.Rows[i]["KOZA_NM"].ToString() + "</option>"+Environment.NewLine;
             }
         } 
-        private void LocListBox(ref cls_OraIf Ora, string Koza, string SOKO_KANRI_CD)
+        private void LocListBox(ref cls_PgsqlIf Pg, string Koza, string SOKO_KANRI_CD)
         {
             string sql = "SELECT KOZA, LOC_NO, KOZA||':'||LOC_NO_EDIT(LOC_NO) as LOCEDIT, SOKO_KANRI_CD " +
                         "FROM( " +
@@ -113,8 +114,8 @@ namespace BXWebService.HTS
                         ") v " +
                         "ORDER BY SOKO_KANRI_CD, KOZA";
             DataTable li = new DataTable();
-            Ora.setSqlCmd(sql, CommandType.Text, true);
-            Ora.ExecuteCmd(ref li);
+            Pg.setSqlCmd(sql, CommandType.Text, true);
+            Pg.ExecuteCmd(ref li);
 
             for (int i = 0; i < li.Rows.Count; i++)
             {

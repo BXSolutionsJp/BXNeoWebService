@@ -6,6 +6,7 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using Newtonsoft.Json;
 using System.Data;
+using NpgsqlTypes;
 
 namespace BXWebService
 {
@@ -37,10 +38,10 @@ namespace BXWebService
 
         private void pickdata(string okurijo_no)
         {
-            cls_OraIf Ora = new cls_OraIf();
+            cls_PgsqlIf Pg = new cls_PgsqlIf();
             try
             {
-                if (!Ora.Connect()) throw new Exception("Oracle Connection Error");
+                if (!Pg.Connect()) throw new Exception("Oracle Connection Error");
             
                 string sql = @"
                             SELECT SGYUKETUKE.OKURIJO_NO,SGYUKETUKE.CHUMON_NO,
@@ -64,11 +65,11 @@ namespace BXWebService
 			                            WHERE CHHYO_ID = 'PICKING' AND FUNC = 'MKPICKING'  AND BIKO =:OKURIJO_NO
 	                            )	";
 
-                Ora.setSqlCmd(sql, CommandType.Text);
-                Ora.addParam(ParameterDirection.Input, "OKURIJO_NO", Oracle.ManagedDataAccess.Client.OracleDbType.Varchar2, okurijo_no, 15);
+                Pg.setSqlCmd(sql, CommandType.Text);
+                Pg.addParam(ParameterDirection.Input, "OKURIJO_NO", NpgsqlDbType.Varchar, okurijo_no, 15);
 
                 dt = new DataTable();
-                dt = Ora.cmdExecDt();
+                dt = Pg.cmdExecDt();
 
                 //if (dt.Rows.Count > 0)
                 //{
@@ -83,7 +84,7 @@ namespace BXWebService
             }
             finally
             {
-                Ora.Disconnect();
+                Pg.Disconnect();
             }
 
 
@@ -92,16 +93,16 @@ namespace BXWebService
 
         private void getKoza()
         {
-            cls_OraIf Ora = new cls_OraIf();
+            cls_PgsqlIf Pg = new cls_PgsqlIf();
 
             try
             {
-                if (!Ora.Connect())
+                if (!Pg.Connect())
                 {
                     throw new Exception("Oracle Connection Error");
                 }
-                Ora.setSqlCmd("SELECT * FROM KOZA", System.Data.CommandType.Text);
-                DataTable dt = Ora.cmdExecDt();
+                Pg.setSqlCmd("SELECT * FROM KOZA", System.Data.CommandType.Text);
+                DataTable dt = Pg.cmdExecDt();
                 JsonTxt = JsonConvert.SerializeObject(dt);
 
 
@@ -113,7 +114,7 @@ namespace BXWebService
             }
             finally
             {
-                Ora.Disconnect();
+                Pg.Disconnect();
             }
 
         }

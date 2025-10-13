@@ -17,20 +17,20 @@ namespace BXWebService
         protected void Page_Load(object sender, EventArgs e)
         {
             string sql = "SELECT KYK_SHN_CD FROM SHN WHERE SHN_CD = 'S130442977'";
-            cls_OraIf Ora = new cls_OraIf();
+            cls_PgsqlIf Pg = new cls_PgsqlIf();
             try
             {
 
                 
-                if (!Ora.Connect())
+                if (!Pg.Connect())
                 {
                     throw new Exception("Oracle Connection Error");
                 }
 
                 DataTable dt = new DataTable();
 
-                Ora.setSqlCmd(sql, CommandType.Text);
-                dt = Ora.cmdExecDt();
+                Pg.setSqlCmd(sql, CommandType.Text);
+                dt = Pg.cmdExecDt();
 
                 if (dt.Rows.Count>=1)
                 {
@@ -65,7 +65,7 @@ namespace BXWebService
                 Console.WriteLine(ex.Message);
             }
             finally {
-                Ora.Disconnect();
+                Pg.Disconnect();
             }
           }
     }

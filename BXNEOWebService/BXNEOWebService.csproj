@@ -251,7 +251,6 @@
     </Compile>
     <Compile Include="cls_Func.cs" />
     <Compile Include="cls_MsSqlIf.cs" />
-    <Compile Include="cls_OraIf.cs" />
     <Compile Include="cls_PgsqlIf.cs" />
     <Compile Include="HTS\chkLogin.aspx.cs">
       <DependentUpon>chkLogin.aspx</DependentUpon>

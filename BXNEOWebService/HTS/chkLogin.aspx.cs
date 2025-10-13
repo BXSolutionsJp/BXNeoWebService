@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NpgsqlTypes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -27,7 +28,7 @@ namespace BXWebService.HTS
 
         private Boolean Login(ref string tc, ref string ps)
         {
-            cls_OraIf Ora = new cls_OraIf();
+            cls_PgsqlIf Pg = new cls_PgsqlIf();
             Boolean f = false;
 
            
@@ -38,22 +39,22 @@ namespace BXWebService.HTS
             string stad = "SP_CHKLOGIN";
             try
             {
-                if (!Ora.Connect())
+                if (!Pg.Connect())
                 {
                     throw new Exception("Oracle Connection Error");
                 }
 
-                Ora.removeSqlParam();
-                Ora.setSqlCmd(stad, System.Data.CommandType.StoredProcedure);
-                Ora.addParam(System.Data.ParameterDirection.Input, "pi_jan_cd", Oracle.ManagedDataAccess.Client.OracleDbType.Varchar2, tc, 40);
-                Ora.addParam(System.Data.ParameterDirection.Input, "pi_konpo_d", Oracle.ManagedDataAccess.Client.OracleDbType.Varchar2, ps, 20);
-                Ora.addParam(System.Data.ParameterDirection.Output, "w_exst", Oracle.ManagedDataAccess.Client.OracleDbType.Int32);
+                Pg.removeSqlParam();
+                Pg.setSqlCmd(stad, System.Data.CommandType.StoredProcedure);
+                Pg.addParam(System.Data.ParameterDirection.Input, "pi_jan_cd", NpgsqlDbType.Varchar, tc, 40);
+                Pg.addParam(System.Data.ParameterDirection.Input, "pi_konpo_d", NpgsqlDbType.Varchar, ps, 20);
+                Pg.addParam(System.Data.ParameterDirection.Output, "w_exst", NpgsqlDbType.Integer);
 
 
 
-                if (Ora.cmdExec())
+                if (Pg.cmdExec())
                 {
-                    if (Ora.getParameter("w_exst") == "1")
+                    if (Pg.getParameter("w_exst") == "1")
                     {
                         f = true;
                     }
@@ -73,7 +74,7 @@ namespace BXWebService.HTS
             }
             finally
             {
-                Ora.Disconnect();
+                Pg.Disconnect();
             }
             return f;
         }        

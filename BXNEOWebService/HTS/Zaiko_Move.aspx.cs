@@ -25,12 +25,12 @@ namespace BXWebService.HTS
                 tantoEncode = Request.QueryString["TANTO_CD"];
                
 
-                cls_OraIf Ora = new cls_OraIf();
+                cls_PgsqlIf Pg = new cls_PgsqlIf();
                 try
                 {
-                    if (!Ora.Connect()) throw new Exception("DB Connection Error");
-                    SOKOSelect(ref Ora,ref tantoEncode);
-                    setListBox(ref Ora);
+                    if (!Pg.Connect()) throw new Exception("DB Connection Error");
+                    SOKOSelect(ref Pg,ref tantoEncode);
+                    setListBox(ref Pg);
                 }
                 catch(Exception ex)
                 {
@@ -38,14 +38,14 @@ namespace BXWebService.HTS
                 }
                 finally
                 {
-                    Ora.Disconnect();
+                    Pg.Disconnect();
                 }
 
             }
         }
 
 
-        private void SOKOSelect(ref cls_OraIf Ora, ref string PlainTanto_CD)
+        private void SOKOSelect(ref cls_PgsqlIf Pg, ref string PlainTanto_CD)
         {
             string sql = "SELECT NNSSOK.SOKO_KANRI_CD, NNSSOK.NNS_SOKO_SHORT_NM, NVL(v.SOKO_KANRI_CD, 'XXXX') as LOGINSOKO " +
                             "FROM NNSSOK LEFT JOIN (  " +
@@ -58,8 +58,8 @@ namespace BXWebService.HTS
             //string sql = "SELECT SOKO_CD FROM TANTO WHERE TANTO_CD='"+ PlainTanto_CD+"'";
 
             DataTable li = new DataTable();
-            Ora.setSqlCmd(sql, CommandType.Text);
-            Ora.ExecuteCmd(ref li);
+            Pg.setSqlCmd(sql, CommandType.Text);
+            Pg.ExecuteCmd(ref li);
 
             for (int i = 0; i < li.Rows.Count; i++)
             {
@@ -72,12 +72,12 @@ namespace BXWebService.HTS
             }
 
         }
-        private void setListBox(ref cls_OraIf Ora, string Koza="0")
+        private void setListBox(ref cls_PgsqlIf Pg, string Koza="0")
         {
             string sql = "SELECT KOZA, KOZA_NM FROM KOZA ORDER BY KOZA";
             DataTable li = new DataTable();
-            Ora.setSqlCmd(sql, CommandType.Text, true);
-            Ora.ExecuteCmd(ref li);
+            Pg.setSqlCmd(sql, CommandType.Text, true);
+            Pg.ExecuteCmd(ref li);
 
             for (int i = 0; i < li.Rows.Count; i++)
             {
