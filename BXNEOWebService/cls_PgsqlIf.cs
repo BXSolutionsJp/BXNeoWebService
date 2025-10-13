@@ -2,9 +2,8 @@ using Npgsql;
 using NpgsqlTypes;
 using System;
 using System.Data;
-using System.Threading.Tasks;
 
-namespace BXWebSErvice
+namespace BXWebService
 {
     public class cls_PgsqlIf
     {
@@ -285,7 +284,7 @@ namespace BXWebSErvice
                 if (_cmd == null) { _cmd = new NpgsqlCommand(sql, _con); }
                 if (tot > -1) { _cmd.CommandTimeout = tot; }
 
-                NpgsqlDataAdapter adapter = new NpgsqlDataAdapter(cmd);
+                NpgsqlDataAdapter adapter = new NpgsqlDataAdapter(_cmd);
                 adapter.Fill(dt);
 
                 if (dt.Rows.Count > 0)

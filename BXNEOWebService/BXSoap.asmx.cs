@@ -4,7 +4,8 @@ using System.Linq;
 using System.Web;
 using System.Web.Services;
 using System.Data;
-using Oracle.ManagedDataAccess.Client;
+using NpgsqlTypes;
+using Npgsql;
 
 namespace BXWebService
 {
@@ -73,7 +74,6 @@ namespace BXWebService
             f = cmd.addParam(ParameterDirection.Input, "@PrtCnt", SqlDbType.Int, PrtCnt);
             f = cmd.addParam(ParameterDirection.Input, "@SerialNo", SqlDbType.VarChar, SerialNo, 255);
             f = cmd.addParam(ParameterDirection.Output, "@RET", SqlDbType.Int);
-
             f = cmd.cmdExec();
 
             return cmd.getParameter("@RET");
@@ -117,7 +117,7 @@ namespace BXWebService
             {
                 if (!clsCmd.Connect())
                 {
-                    throw new Exception("Oracle Connection Error");
+                    throw new Exception("Postgres Connection Error");
                 }
                 clsCmd.removeSqlParam();
                 clsCmd.setSqlCmd("sp_Reg_HaikiShip");
@@ -169,19 +169,19 @@ namespace BXWebService
                                 AND LOCATION.LOC_NO	BETWEEN FROM_LOC_NO AND TO_LOC_NO
                                 AND LOCATION.LOC_NO   = LOC_NO_EDIT_ADD(:LOC_EDIT)";
 
-            cls_OraIf Ora = new cls_OraIf();
+            cls_PgsqlIf Pg = new cls_PgsqlIf();
             try
             {
-                if (!Ora.Connect())
+                if (!Pg.Connect())
                 {
-                    throw new Exception("Oracle Connection Error");
+                    throw new Exception("Postgres Connection Error");
                 }
-                Ora.removeSqlParam();
-                Ora.setSqlCmd(sql, CommandType.Text);
-                Ora.addParam(ParameterDirection.Input, "SOKO_KANRI_CD", Oracle.ManagedDataAccess.Client.OracleDbType.Varchar2, SOKO_KANRI_CD, 8);
-                Ora.addParam(ParameterDirection.Input, "LOC_EDIT", Oracle.ManagedDataAccess.Client.OracleDbType.Varchar2, LOC_EDIT, 15);
+                Pg.removeSqlParam();
+                Pg.setSqlCmd(sql, CommandType.Text);
+                Pg.addParam(ParameterDirection.Input, "SOKO_KANRI_CD", NpgsqlDbType.Varchar, SOKO_KANRI_CD, 8);
+                Pg.addParam(ParameterDirection.Input, "LOC_EDIT", NpgsqlDbType.Varchar, LOC_EDIT, 15);
 
-                ret = Ora.getDirectValue();
+                ret = Pg.getDirectValue();
             }
             catch (Exception ex)
             {
@@ -189,7 +189,7 @@ namespace BXWebService
             }
             finally
             {
-                Ora.Disconnect();
+                Pg.Disconnect();
             }
 
             return ret;
@@ -202,32 +202,32 @@ namespace BXWebService
             
 
             
-            cls_OraIf Ora = new cls_OraIf();
+            cls_PgsqlIf Pg = new cls_PgsqlIf();
             try
             {
-                if (!Ora.Connect())
+                if (!Pg.Connect())
                 {
-                    throw new Exception("Oracle Connection Error");
+                    throw new Exception("Postgres Connection Error");
                 }
 
-                Ora.removeSqlParam();
-                Ora.setSqlCmd("SP_GET_KOFUKU", CommandType.StoredProcedure);
-                Ora.addParam(ParameterDirection.Input, "KEY", OracleDbType.Varchar2, KEY, 13);
-                Ora.addParam(ParameterDirection.Output, "po_kyk_shn_cd", OracleDbType.Varchar2, "", 20);
-                Ora.addParam(ParameterDirection.Output, "po_jan_cd", OracleDbType.Varchar2, "", 13);
-                Ora.addParam(ParameterDirection.Output, "po_konpo_d", OracleDbType.Int16);
-                Ora.addParam(ParameterDirection.Output, "po_konpo_w", OracleDbType.Int16);
-                Ora.addParam(ParameterDirection.Output, "po_konpo_h", OracleDbType.Int16);
-                Ora.addParam(ParameterDirection.Output, "po_konpo_wght", OracleDbType.Int16);
+                Pg.removeSqlParam();
+                Pg.setSqlCmd("SP_GET_KOFUKU", CommandType.StoredProcedure);
+                Pg.addParam(ParameterDirection.Input, "KEY", NpgsqlDbType.Varchar, KEY, 13);
+                Pg.addParam(ParameterDirection.Output, "po_kyk_shn_cd", NpgsqlDbType.Varchar, "", 20);
+                Pg.addParam(ParameterDirection.Output, "po_jan_cd", NpgsqlDbType.Varchar, "", 13);
+                Pg.addParam(ParameterDirection.Output, "po_konpo_d", NpgsqlDbType.Integer);
+                Pg.addParam(ParameterDirection.Output, "po_konpo_w", NpgsqlDbType.Integer);
+                Pg.addParam(ParameterDirection.Output, "po_konpo_h", NpgsqlDbType.Integer);
+                Pg.addParam(ParameterDirection.Output, "po_konpo_wght", NpgsqlDbType.Integer);
 
-                Ora.cmdExec();
+                Pg.cmdExec();
 
-                ki.KYK_SHN_CD = Ora.getParameter("po_kyk_shn_cd");
-                ki.JAN_CD = Ora.getParameter("po_jan_cd");
-                ki.KONPO_W = Ora.getParameter("po_konpo_w");
-                ki.KONPO_D = Ora.getParameter("po_konpo_d");
-                ki.KONPO_H = Ora.getParameter("po_konpo_h");
-                ki.KONPO_WGHT = Ora.getParameter("po_konpo_wght");
+                ki.KYK_SHN_CD = Pg.getParameter("po_kyk_shn_cd");
+                ki.JAN_CD = Pg.getParameter("po_jan_cd");
+                ki.KONPO_W = Pg.getParameter("po_konpo_w");
+                ki.KONPO_D = Pg.getParameter("po_konpo_d");
+                ki.KONPO_H = Pg.getParameter("po_konpo_h");
+                ki.KONPO_WGHT = Pg.getParameter("po_konpo_wght");
 
             }
             catch (Exception ex)
@@ -236,7 +236,7 @@ namespace BXWebService
             }
             finally
             {
-                Ora.Disconnect();
+                Pg.Disconnect();
             }
             return ki;
         }
@@ -257,23 +257,23 @@ namespace BXWebService
                             AND LOC_NO = LOC_NO_EDIT_ADD(:loc_no) AND KOZA LIKE :koza
                         GROUP BY NNSSOK.SOKO_KANRI_CD,SHN.KYK_SHN_CD,GNPNZAIKO.GNPN_SHN_CD,SHN.SHN_NM,GNPNZAIKO.KOZA  ";
 
-                cls_OraIf Ora = new cls_OraIf();
+                cls_PgsqlIf Pg = new cls_PgsqlIf();
                 DataTable dt = new DataTable();
 
             try
             {
-                if (!Ora.Connect())
+                if (!Pg.Connect())
                 {
-                    throw new Exception("Oracle Connection Error");
+                    throw new Exception("Postgres Connection Error");
                 }
-                Ora.removeSqlParam();
-                Ora.setSqlCmd(sql, CommandType.Text);
-                Ora.addParam(ParameterDirection.Input, "kyk_shn_cd", Oracle.ManagedDataAccess.Client.OracleDbType.Varchar2, SHN_CD, 13);
-                Ora.addParam(ParameterDirection.Input, "soko_kanri_cd", Oracle.ManagedDataAccess.Client.OracleDbType.Varchar2, SOKO_KANRI_CD, 13);
-                Ora.addParam(ParameterDirection.Input, "loc_no", Oracle.ManagedDataAccess.Client.OracleDbType.Varchar2, LOC_NO, 13);
-                Ora.addParam(ParameterDirection.Input, "koza", Oracle.ManagedDataAccess.Client.OracleDbType.Varchar2, KOZA, 13);
+                Pg.removeSqlParam();
+                Pg.setSqlCmd(sql, CommandType.Text);
+                Pg.addParam(ParameterDirection.Input, "kyk_shn_cd", NpgsqlDbType.Varchar, SHN_CD, 13);
+                Pg.addParam(ParameterDirection.Input, "soko_kanri_cd", NpgsqlDbType.Varchar, SOKO_KANRI_CD, 13);
+                Pg.addParam(ParameterDirection.Input, "loc_no", NpgsqlDbType.Varchar, LOC_NO, 13);
+                Pg.addParam(ParameterDirection.Input, "koza", NpgsqlDbType.Varchar, KOZA, 13);
 
-                dt = Ora.cmdExecDt();
+                dt = Pg.cmdExecDt();
                 if (dt.Rows.Count > 0)
                 {
                     
@@ -287,13 +287,13 @@ namespace BXWebService
                     
                 }
             }
-            catch (OracleException ex)
+            catch (NpgsqlException ex)
             {
                 ErrLog.logger.log(ex);
             }
             finally
             {
-                Ora.Disconnect();
+                Pg.Disconnect();
             }
             return list;
         }
@@ -303,43 +303,43 @@ namespace BXWebService
 
             GENERAL gn = new GENERAL();
 
-            cls_OraIf Ora = new cls_OraIf();
+            cls_PgsqlIf Pg = new cls_PgsqlIf();
             DataTable dt = new DataTable();
 
             try
             {
                 string stad = "SP_GET_TANA_INFO";                
                
-                    if (!Ora.Connect())
+                    if (!Pg.Connect())
                     {
-                        throw new Exception("Oracle Connection Error");
+                        throw new Exception("Postgres Connection Error");
                     }
 
-                    Ora.removeSqlParam();
-                    Ora.setSqlCmd(stad, CommandType.StoredProcedure);
-                    Ora.addParam(ParameterDirection.Input, "p_soko_kanri_cd", OracleDbType.Varchar2, SOKO_KANRI_CD, 4);
-                    Ora.addParam(ParameterDirection.Input, "p_loc_no", OracleDbType.Varchar2, LOC_NO, 15);
-                    Ora.addParam(ParameterDirection.Output, "p_sku_cnt", OracleDbType.Int32);
-                    Ora.addParam(ParameterDirection.Output, "p_koza_cnt", OracleDbType.Int32);
-                    Ora.addParam(ParameterDirection.Output, "p_total_cnt", OracleDbType.Int32);
-                    Ora.addParam(ParameterDirection.Output, "p_hkat_cnt", OracleDbType.Int32);
-                if (Ora.cmdExec())
+                    Pg.removeSqlParam();
+                    Pg.setSqlCmd(stad, CommandType.StoredProcedure);
+                    Pg.addParam(ParameterDirection.Input, "p_soko_kanri_cd", NpgsqlDbType.Varchar, SOKO_KANRI_CD, 4);
+                    Pg.addParam(ParameterDirection.Input, "p_loc_no", NpgsqlDbType.Varchar, LOC_NO, 15);
+                    Pg.addParam(ParameterDirection.Output, "p_sku_cnt", NpgsqlDbType.Integer);
+                    Pg.addParam(ParameterDirection.Output, "p_koza_cnt", NpgsqlDbType.Integer);
+                    Pg.addParam(ParameterDirection.Output, "p_total_cnt", NpgsqlDbType.Integer);
+                    Pg.addParam(ParameterDirection.Output, "p_hkat_cnt", NpgsqlDbType.Integer);
+                if (Pg.cmdExec())
                 {
-                    gn.VAL_1 = Ora.getParameter("p_sku_cnt").ToString();
-                    gn.VAL_2 = Ora.getParameter("p_koza_cnt").ToString();
-                    gn.VAL_3 = Ora.getParameter("p_total_cnt").ToString();
-                    gn.VAL_4 = Ora.getParameter("p_hkat_cnt").ToString();
+                    gn.VAL_1 = Pg.getParameter("p_sku_cnt").ToString();
+                    gn.VAL_2 = Pg.getParameter("p_koza_cnt").ToString();
+                    gn.VAL_3 = Pg.getParameter("p_total_cnt").ToString();
+                    gn.VAL_4 = Pg.getParameter("p_hkat_cnt").ToString();
                 }
                
                 
             }
-            catch (OracleException ex)
+            catch (NpgsqlException ex)
             {
                 ErrLog.logger.log(ex);
             }
             finally
             {
-                Ora.Disconnect();
+                Pg.Disconnect();
             }
 
             return gn;
@@ -360,24 +360,24 @@ namespace BXWebService
                                 "AND ( HKATSHIJI.STS BETWEEN   KOTEIPROC.MIN_STS AND KOTEIPROC.MAX_STS ) " +
                                 "AND HKATSHIJI.SGY_SHIJI_NO = SGYSHIJI.SGY_SHIJI_NO " +
                                 "AND (SHN.KYK_SHN_CD LIKE '" + shnCd + "%' OR  SHN.JAN_CD = '" + shnCd + "')";
-            cls_OraIf Ora = new cls_OraIf();
+            cls_PgsqlIf Pg = new cls_PgsqlIf();
             DataTable dt = new DataTable();
 
             try
             {
 
 
-                if (!Ora.Connect())
+                if (!Pg.Connect())
                 {
-                    throw new Exception("Oracle Connection Error");
+                    throw new Exception("Postgres Connection Error");
                 }
 
-                Ora.removeSqlParam();
-                Ora.setSqlCmd(sql, CommandType.Text);
+                Pg.removeSqlParam();
+                Pg.setSqlCmd(sql, CommandType.Text);
                 //Ora.addParam(ParameterDirection.Input, "kyk_shn_cd", Oracle.ManagedDataAccess.Client.OracleDbType.Varchar2, shnCd, 13);
 
 
-                dt = Ora.cmdExecDt();
+                dt = Pg.cmdExecDt();
                 if (dt.Rows.Count > 0)
                 {
                     Array.Resize(ref list, dt.Rows.Count);
@@ -396,7 +396,7 @@ namespace BXWebService
             }
             finally
             {
-                Ora.Disconnect();
+                Pg.Disconnect();
             }
 
             return list;
@@ -406,24 +406,24 @@ namespace BXWebService
         {
 
             string sql = "SELECT TANTO_NM FROM TANTO WHERE TANTO_CD=:TANTO_CD";
-            cls_OraIf Ora = new cls_OraIf();
+            cls_PgsqlIf Pg = new cls_PgsqlIf();
             DataTable dt = new DataTable();
             string TANTO_NM = string.Empty;
             try
             {
 
 
-                if (!Ora.Connect())
+                if (!Pg.Connect())
                 {
-                    throw new Exception("Oracle Connection Error");
+                    throw new Exception("Postgres Connection Error");
                 }
 
-                Ora.removeSqlParam();
-                Ora.setSqlCmd(sql, CommandType.Text);
-                Ora.addParam(ParameterDirection.Input, "TANTO_CD", Oracle.ManagedDataAccess.Client.OracleDbType.Varchar2, TANTO_CD, 13);
+                Pg.removeSqlParam();
+                Pg.setSqlCmd(sql, CommandType.Text);
+                Pg.addParam(ParameterDirection.Input, "TANTO_CD", NpgsqlDbType.Varchar, TANTO_CD, 13);
 
 
-                TANTO_NM = Ora.getDirectValue();
+                TANTO_NM = Pg.getDirectValue();
             }
             catch (Exception ex)
             {
@@ -431,7 +431,7 @@ namespace BXWebService
             }
             finally
             {
-                Ora.Disconnect();
+                Pg.Disconnect();
             }
 
             return TANTO_NM;
@@ -441,20 +441,20 @@ namespace BXWebService
         {
             string tanto_nm = string.Empty;
             string stad = "SP_GET_TANTO_NM";
-            cls_OraIf Ora = new cls_OraIf();
+            cls_PgsqlIf Pg = new cls_PgsqlIf();
             try
             {
-                if (!Ora.Connect())
+                if (!Pg.Connect())
                 {
-                    throw new Exception("Oracle Connection Error");
+                    throw new Exception("Postgres Connection Error");
                 }
-                Ora.removeSqlParam();
-                Ora.setSqlCmd(stad, CommandType.StoredProcedure);
-                Ora.addParam(ParameterDirection.Input, "pi_tanto_cd", Oracle.ManagedDataAccess.Client.OracleDbType.Varchar2, TANTO_CD, 15);
-                Ora.addParam(ParameterDirection.Output, "po_tanto_nm", OracleDbType.Varchar2, "", 15);
-                if (Ora.cmdExec())
+                Pg.removeSqlParam();
+                Pg.setSqlCmd(stad, CommandType.StoredProcedure);
+                Pg.addParam(ParameterDirection.Input, "pi_tanto_cd", NpgsqlDbType.Varchar, TANTO_CD, 15);
+                Pg.addParam(ParameterDirection.Output, "po_tanto_nm", NpgsqlDbType.Varchar, "", 15);
+                if (Pg.cmdExec())
                 {
-                    tanto_nm = Ora.getParameter("po_tanto_nm");
+                    tanto_nm = Pg.getParameter("po_tanto_nm");
                 }
             }
             catch (Exception ex)
@@ -463,7 +463,7 @@ namespace BXWebService
             }
             finally
             {
-                Ora.Disconnect();
+                Pg.Disconnect();
             }
             return tanto_nm;
         }
@@ -484,24 +484,24 @@ namespace BXWebService
             {
                 LOT_NO = System.DateTime.Now.ToString("yyyyMMdd");
             }
-            cls_OraIf OraDb = new cls_OraIf();
+            cls_PgsqlIf Pg = new cls_PgsqlIf();
             Boolean f = false;
             string ret = string.Empty;
 
             try
             {
-                if (!OraDb.Connect()) throw new System.Exception("Oracle Connection Error");
-                f = OraDb.setSqlCmd("pack_lip.proc_LipStore_End", CommandType.StoredProcedure);
-                f = OraDb.addParam(ParameterDirection.Input, "p_hkat_shiji_no", OracleDbType.Varchar2, HKAT_SHIJI_NO, 15);
-                f = OraDb.addParam(ParameterDirection.Input, "p_qty", OracleDbType.Decimal, QTY);
-                f = OraDb.addParam(ParameterDirection.Input, "p_loc_no", OracleDbType.Varchar2, LOC_NO, 15);
-                f = OraDb.addParam(ParameterDirection.Input, "p_lip_no", OracleDbType.Varchar2, LIP_NO, 15);
-                f = OraDb.addParam(ParameterDirection.Input, "p_lot_no", OracleDbType.Varchar2, LOT_NO, 64);
-                f = OraDb.addParam(ParameterDirection.Input, "p_rsn_cd", OracleDbType.Varchar2, RSN_CD, 6);
-                f = OraDb.addParam(ParameterDirection.Input, "p_upd_tanto_cd", OracleDbType.Varchar2, TANTO, 8);
-                f = OraDb.addParam(ParameterDirection.Output, "p_rc", OracleDbType.Varchar2, "", 2);
-                f = OraDb.cmdExec();
-                ret = OraDb.getParameter("p_rc").ToString().Trim();
+                if (!Pg.Connect()) throw new System.Exception("Postgres Connection Error");
+                f = Pg.setSqlCmd("pack_lip.proc_LipStore_End", CommandType.StoredProcedure);
+                f = Pg.addParam(ParameterDirection.Input, "p_hkat_shiji_no", NpgsqlDbType.Varchar, HKAT_SHIJI_NO, 15);
+                f = Pg.addParam(ParameterDirection.Input, "p_qty", NpgsqlDbType.Numeric, QTY);
+                f = Pg.addParam(ParameterDirection.Input, "p_loc_no", NpgsqlDbType.Varchar, LOC_NO, 15);
+                f = Pg.addParam(ParameterDirection.Input, "p_lip_no", NpgsqlDbType.Varchar, LIP_NO, 15);
+                f = Pg.addParam(ParameterDirection.Input, "p_lot_no", NpgsqlDbType.Varchar, LOT_NO, 64);
+                f = Pg.addParam(ParameterDirection.Input, "p_rsn_cd", NpgsqlDbType.Varchar, RSN_CD, 6);
+                f = Pg.addParam(ParameterDirection.Input, "p_upd_tanto_cd", NpgsqlDbType.Varchar, TANTO, 8);
+                f = Pg.addParam(ParameterDirection.Output, "p_rc", NpgsqlDbType.Varchar, "", 2);
+                f = Pg.cmdExec();
+                ret = Pg.getParameter("p_rc").ToString().Trim();
             }
             catch (Exception ex)
             {
@@ -509,7 +509,7 @@ namespace BXWebService
             }
             finally
             {
-                OraDb.Disconnect();
+                Pg.Disconnect();
             }
             return ret;
         }        
@@ -520,39 +520,36 @@ namespace BXWebService
             string TANTO = string.Empty;
             string MOT_LOC_ADD = string.Empty;
             string SAKI_LOC_ADD = string.Empty;
-            
 
-            cls_OraIf OraDb = new cls_OraIf();
+            cls_PgsqlIf Pg = new cls_PgsqlIf();
             Boolean f = false;
             string ret = string.Empty;
 
-            
-
             try
             {
-                if (!OraDb.Connect()) throw new System.Exception("Oracle Connection Error");
-                MOT_LOC_ADD = LOC_NO_EDIT_ADD(ref OraDb, MOTO_LOC);
-                SAKI_LOC_ADD = LOC_NO_EDIT_ADD(ref OraDb, SAKI_LOC);
-                f = OraDb.setSqlCmd("SP_FIFO_IDO", CommandType.StoredProcedure, true);
-                f = OraDb.addParam(ParameterDirection.Input, "p_gnpn_shn_cd", OracleDbType.Varchar2, GNPN_SHN_CD, 36);
-                f = OraDb.addParam(ParameterDirection.Input, "p_koza", OracleDbType.Varchar2, KOZA, 4);
-                f = OraDb.addParam(ParameterDirection.Input, "p_unit", OracleDbType.Char, "P", 1);
-                f = OraDb.addParam(ParameterDirection.Input, "p_motoloc_no", OracleDbType.Varchar2, MOT_LOC_ADD, 15);
-                f = OraDb.addParam(ParameterDirection.Input, "p_sakiloc_no", OracleDbType.Varchar2, SAKI_LOC_ADD, 15);
-                f = OraDb.addParam(ParameterDirection.Input, "p_qty", OracleDbType.Decimal, QTY);
-                f = OraDb.addParam(ParameterDirection.Input, "p_hkat_flg", OracleDbType.Varchar2, "0",3);
-                f = OraDb.addParam(ParameterDirection.Input, "p_dict_flg", OracleDbType.Varchar2, "0", 3);
-                f = OraDb.addParam(ParameterDirection.Input, "p_tanto_cd", OracleDbType.Varchar2, TANTO_CD, 8);
-                f = OraDb.addParam(ParameterDirection.Output, "p_rtn", OracleDbType.Varchar2, "", 15);
-                f = OraDb.addParam(ParameterDirection.Output, "p_rtn_qty", OracleDbType.Decimal);
-                f = OraDb.cmdExec();
+                if (!Pg.Connect()) throw new System.Exception("Postgres Connection Error");
+                // LOC_NO_EDIT_ADD の Pg 版が必要
+                MOT_LOC_ADD = MOTO_LOC; // LOC_NO_EDIT_ADD(ref Pg, MOTO_LOC); // 実装に応じて修正
+                SAKI_LOC_ADD = SAKI_LOC; // LOC_NO_EDIT_ADD(ref Pg, SAKI_LOC); // 実装に応じて修正
+                f = Pg.setSqlCmd("SP_FIFO_IDO", CommandType.StoredProcedure, true);
+                f = Pg.addParam(ParameterDirection.Input, "p_gnpn_shn_cd", NpgsqlDbType.Varchar, GNPN_SHN_CD, 36);
+                f = Pg.addParam(ParameterDirection.Input, "p_koza", NpgsqlDbType.Varchar, KOZA, 4);
+                f = Pg.addParam(ParameterDirection.Input, "p_unit", NpgsqlDbType.Char, "P", 1);
+                f = Pg.addParam(ParameterDirection.Input, "p_motoloc_no", NpgsqlDbType.Varchar, MOT_LOC_ADD, 15);
+                f = Pg.addParam(ParameterDirection.Input, "p_sakiloc_no", NpgsqlDbType.Varchar, SAKI_LOC_ADD, 15);
+                f = Pg.addParam(ParameterDirection.Input, "p_qty", NpgsqlDbType.Numeric, QTY);
+                f = Pg.addParam(ParameterDirection.Input, "p_hkat_flg", NpgsqlDbType.Varchar, "0",3);
+                f = Pg.addParam(ParameterDirection.Input, "p_dict_flg", NpgsqlDbType.Varchar, "0", 3);
+                f = Pg.addParam(ParameterDirection.Input, "p_tanto_cd", NpgsqlDbType.Varchar, TANTO_CD, 8);
+                f = Pg.addParam(ParameterDirection.Output, "p_rtn", NpgsqlDbType.Varchar, "", 15);
+                f = Pg.addParam(ParameterDirection.Output, "p_rtn_qty", NpgsqlDbType.Numeric);
+                f = Pg.cmdExec();
 
-                Ret.RTN = OraDb.getParameter("p_rtn").ToString().Trim();
-                Ret.RTN_QTY = OraDb.getParameter("p_rtn_qty").ToString().Trim();
+                Ret.RTN = Pg.getParameter("p_rtn").ToString().Trim();
+                Ret.RTN_QTY = Pg.getParameter("p_rtn_qty").ToString().Trim();
                 Ret.KYK_SHN_CD = KYK_SHN_CD;
                 Ret.MOT_LOC = MOTO_LOC;
                 Ret.SAKI_LOC = SAKI_LOC;
-                
             }
             catch (Exception ex)
             {
@@ -560,12 +557,9 @@ namespace BXWebService
             }
             finally
             {
-                OraDb.Disconnect();
+                Pg.Disconnect();
             }
-
-
             return Ret;
-
         }
         [WebMethod]
         public MoveFIFO MoveZaikoTanaAll(string SOKO_KANRI_CD, string KOZA, string MOTO_LOC, string SAKI_LOC, string TANTO_CD)
@@ -574,33 +568,30 @@ namespace BXWebService
             string TANTO = string.Empty;
             string MOT_LOC_ADD = string.Empty;
             string SAKI_LOC_ADD = string.Empty;
-            
 
-            cls_OraIf OraDb = new cls_OraIf();
+            cls_PgsqlIf Pg = new cls_PgsqlIf();
             Boolean f = false;
             string ret = string.Empty;
 
-
-
             try
             {
-                if (!OraDb.Connect()) throw new System.Exception("Oracle Connection Error");
-                MOT_LOC_ADD = LOC_NO_EDIT_ADD(ref OraDb, MOTO_LOC);
-                SAKI_LOC_ADD = LOC_NO_EDIT_ADD(ref OraDb, SAKI_LOC);
-                f = OraDb.setSqlCmd("SP_IDO_TANA_ALL", CommandType.StoredProcedure, true);
-                f = OraDb.addParam(ParameterDirection.Input, "p_soko_kanri_cd", OracleDbType.Varchar2, SOKO_KANRI_CD, 8);
-                f = OraDb.addParam(ParameterDirection.Input, "p_koza", OracleDbType.Varchar2, KOZA, 4);                
-                f = OraDb.addParam(ParameterDirection.Input, "p_motoloc_no", OracleDbType.Varchar2, MOT_LOC_ADD, 15);
-                f = OraDb.addParam(ParameterDirection.Input, "p_sakiloc_no", OracleDbType.Varchar2, SAKI_LOC_ADD, 15);                
-                f = OraDb.addParam(ParameterDirection.Output, "p_cnt", OracleDbType.Decimal);
-                f = OraDb.cmdExec();
+                if (!Pg.Connect()) throw new System.Exception("Postgres Connection Error");
+                // LOC_NO_EDIT_ADD の Pg 版が必要
+                MOT_LOC_ADD = MOTO_LOC; // LOC_NO_EDIT_ADD(ref Pg, MOTO_LOC); // 実装に応じて修正
+                SAKI_LOC_ADD = SAKI_LOC; // LOC_NO_EDIT_ADD(ref Pg, SAKI_LOC); // 実装に応じて修正
+                f = Pg.setSqlCmd("SP_IDO_TANA_ALL", CommandType.StoredProcedure, true);
+                f = Pg.addParam(ParameterDirection.Input, "p_soko_kanri_cd", NpgsqlDbType.Varchar, SOKO_KANRI_CD, 8);
+                f = Pg.addParam(ParameterDirection.Input, "p_koza", NpgsqlDbType.Varchar, KOZA, 4);                
+                f = Pg.addParam(ParameterDirection.Input, "p_motoloc_no", NpgsqlDbType.Varchar, MOT_LOC_ADD, 15);
+                f = Pg.addParam(ParameterDirection.Input, "p_sakiloc_no", NpgsqlDbType.Varchar, SAKI_LOC_ADD, 15);                
+                f = Pg.addParam(ParameterDirection.Output, "p_cnt", NpgsqlDbType.Numeric);
+                f = Pg.cmdExec();
 
                 Ret.RTN = "";
-                Ret.RTN_QTY = OraDb.getParameter("p_cnt").ToString().Trim();
+                Ret.RTN_QTY = Pg.getParameter("p_cnt").ToString().Trim();
                 Ret.KYK_SHN_CD = "";
                 Ret.MOT_LOC = MOTO_LOC;
                 Ret.SAKI_LOC = SAKI_LOC;
-
             }
             catch (Exception ex)
             {
@@ -608,47 +599,39 @@ namespace BXWebService
             }
             finally
             {
-                OraDb.Disconnect();
+                Pg.Disconnect();
             }
-
-
             return Ret;
-
         }
         [WebMethod]
         public string RegKofukuInfo(string KYK_SHN_CD, string KONPO_W, string KONPO_D, string KONPO_H, string KONPO_WGHT)
         {
             string ret = string.Empty;
-            //string sql = "BEGIN  SP_REG_KOFUKU(:pi_jan_cd,:pi_konpo_d,:pi_konpo_w,:pi_konpo_h,:pi_konpo_wght,:po_ret);  END;";
             string stad = "SP_REG_KOFUKU";
-            cls_OraIf Ora = new cls_OraIf();
-
+            cls_PgsqlIf Pg = new cls_PgsqlIf();
             cls_MsSqlIf SqlDb = new cls_MsSqlIf();
             try
             {
-                if (!Ora.Connect())
+                if (!Pg.Connect())
                 {
-                    throw new Exception("Oracle Connection Error");
+                    throw new Exception("Postgres Connection Error");
                 }
-
-                Ora.removeSqlParam();
-                Ora.setSqlCmd(stad, CommandType.StoredProcedure);
-                Ora.addParam(ParameterDirection.Input, "pi_kyk_shn_cd", OracleDbType.Varchar2, KYK_SHN_CD, 13);
-                Ora.addParam(ParameterDirection.Input, "pi_konpo_d", OracleDbType.Int32, KONPO_D);
-                Ora.addParam(ParameterDirection.Input, "pi_konpo_w", OracleDbType.Int32, KONPO_W);                
-                Ora.addParam(ParameterDirection.Input, "pi_konpo_h", OracleDbType.Int32, KONPO_H);
-                Ora.addParam(ParameterDirection.Input, "pi_konpo_wght", OracleDbType.Int32, KONPO_WGHT);
-                Ora.addParam(ParameterDirection.Output, "po_ret", OracleDbType.Int32);
-                if (Ora.cmdExec())
+                Pg.removeSqlParam();
+                Pg.setSqlCmd(stad, CommandType.StoredProcedure);
+                Pg.addParam(ParameterDirection.Input, "pi_kyk_shn_cd", NpgsqlDbType.Varchar, KYK_SHN_CD, 13);
+                Pg.addParam(ParameterDirection.Input, "pi_konpo_d", NpgsqlDbType.Integer, KONPO_D);
+                Pg.addParam(ParameterDirection.Input, "pi_konpo_w", NpgsqlDbType.Integer, KONPO_W);                
+                Pg.addParam(ParameterDirection.Input, "pi_konpo_h", NpgsqlDbType.Integer, KONPO_H);
+                Pg.addParam(ParameterDirection.Input, "pi_konpo_wght", NpgsqlDbType.Integer, KONPO_WGHT);
+                Pg.addParam(ParameterDirection.Output, "po_ret", NpgsqlDbType.Integer);
+                if (Pg.cmdExec())
                 {
-                    ret = Ora.getParameter("po_ret");
+                    ret = Pg.getParameter("po_ret");
                 }
-
                 if (!SqlDb.Connect())
                 {
                     throw new Exception("MSSQL Connection Error");
                 }
-
                 SqlDb.removeSqlParam();
                 SqlDb.setSqlCmd("sp_SOAP_UpdateItemKofuku");
                 SqlDb.addParam(ParameterDirection.Input, "@ItemCode", SqlDbType.VarChar, KYK_SHN_CD, 20);
@@ -657,7 +640,6 @@ namespace BXWebService
                 SqlDb.addParam(ParameterDirection.Input, "@KONPO_H", SqlDbType.Int, KONPO_H);
                 SqlDb.addParam(ParameterDirection.Input, "@KONPO_WGHT", SqlDbType.Int, KONPO_WGHT);
                 SqlDb.cmdExec();
-
             }
             catch (Exception ex)
             {
@@ -665,7 +647,7 @@ namespace BXWebService
             }
             finally
             {
-                Ora.Disconnect();
+                Pg.Disconnect();
                 SqlDb.Disconnect();
             }
             return ret;
@@ -674,19 +656,19 @@ namespace BXWebService
         public string strJanToKykShnCd(string JanCode)
         {
             string sql = "SELECT KYK_SHN_CD FROM SHN WHERE JAN_CD=:JAN_CD OR KYK_SHN_CD=:JAN_CD";
-            cls_OraIf Ora = new cls_OraIf();
+            cls_PgsqlIf Pg = new cls_PgsqlIf();
             DataTable dt = new DataTable();
             string kykShnCd = string.Empty;
             try
             {
-                if (!Ora.Connect())
+                if (!Pg.Connect())
                 {
-                    throw new Exception("Oracle Connection Error");
+                    throw new Exception("Postgres Connection Error");
                 }
-                Ora.removeSqlParam();
-                Ora.setSqlCmd(sql, CommandType.Text);
-                Ora.addParam(ParameterDirection.Input, "JAN_CD", Oracle.ManagedDataAccess.Client.OracleDbType.Varchar2, JanCode, 13);
-                kykShnCd = Ora.getDirectValue();
+                Pg.removeSqlParam();
+                Pg.setSqlCmd(sql, CommandType.Text);
+                Pg.addParam(ParameterDirection.Input, "JAN_CD", NpgsqlDbType.Varchar, JanCode, 13);
+                kykShnCd = Pg.getDirectValue();
             }
             catch (Exception ex)
             {
@@ -694,43 +676,32 @@ namespace BXWebService
             }
             finally
             {
-                Ora.Disconnect();
+                Pg.Disconnect();
             }
-
             return kykShnCd;
         }
         [WebMethod]
         public GENERAL getShnCdFromKEY(string KEY_CD)
         {
             GENERAL gn = new GENERAL();
-
-            
-            cls_OraIf Ora = new cls_OraIf();
-            
-            
+            cls_PgsqlIf Pg = new cls_PgsqlIf();
             try
             {
-                if (!Ora.Connect())
+                if (!Pg.Connect())
                 {
-                    throw new Exception("Oracle Connection Error");
+                    throw new Exception("Postgres Connection Error");
                 }
-                Boolean f =  Ora.removeSqlParam();
-                f = Ora.setSqlCmd("SP_GETSHN_CD_FROMKEY", CommandType.StoredProcedure);
-                f = Ora.addParam(ParameterDirection.Input, "KEY_CD", Oracle.ManagedDataAccess.Client.OracleDbType.Varchar2, KEY_CD, 13);
-                f = Ora.addParam(ParameterDirection.Output, "po_kyk_shn_cd", OracleDbType.Varchar2, "", 15);
-                f = Ora.addParam(ParameterDirection.Output, "po_jan_cd", OracleDbType.Varchar2, "", 15);
-
-                f = Ora.cmdExec();
-
+                Boolean f =  Pg.removeSqlParam();
+                f = Pg.setSqlCmd("SP_GETSHN_CD_FROMKEY", CommandType.StoredProcedure);
+                f = Pg.addParam(ParameterDirection.Input, "KEY_CD", NpgsqlDbType.Varchar, KEY_CD, 13);
+                f = Pg.addParam(ParameterDirection.Output, "po_kyk_shn_cd", NpgsqlDbType.Varchar, "", 15);
+                f = Pg.addParam(ParameterDirection.Output, "po_jan_cd", NpgsqlDbType.Varchar, "", 15);
+                f = Pg.cmdExec();
                 if (f)
                 {
-                    gn.VAL_1 = Ora.getParameter("po_kyk_shn_cd").ToString();
-                    gn.VAL_2 = Ora.getParameter("po_jan_cd").ToString();
+                    gn.VAL_1 = Pg.getParameter("po_kyk_shn_cd").ToString();
+                    gn.VAL_2 = Pg.getParameter("po_jan_cd").ToString();
                 }
-
-
-
-
             }
             catch (Exception ex)
             {
@@ -738,26 +709,17 @@ namespace BXWebService
             }
             finally
             {
-                Ora.Disconnect();
+                Pg.Disconnect();
             }
-
-            
-
-
-
-
             return gn;
         }
         [WebMethod]
         public GENERAL[] GETSUISHOLOC(string KEY_CD, string TANTO)
         {
             GENERAL[] GN = new GENERAL[0];
-
-
-            cls_OraIf Ora = new cls_OraIf();
+            cls_PgsqlIf Pg = new cls_PgsqlIf();
             DataTable dt = new DataTable();
             Boolean f = true;
-
             string sql = "SELECT LOC_NO_EDIT(G.LOC_NO) as LOCEDIT, G.LOC_NO,S.KYK_SHN_CD,G.GNPN_SHN_CD,SUM(G.TANA_ZK_QTY) as TANA_QTY,SUM(G.SHKA_HKTE_QTY) as SHKA_QTY "+
                         "FROM GNPNZAIKO G, SHN S, NNSSOK N, TANTO T " +
                         "WHERE G.SHN_CD = S.SHN_CD " +
@@ -770,25 +732,17 @@ namespace BXWebService
                         "GROUP BY G.LOC_NO,S.KYK_SHN_CD,G.GNPN_SHN_CD " +
                         "HAVING SUM(G.TANA_ZK_QTY) > 0 " +
                         "ORDER BY SUM(G.TANA_ZK_QTY)  DESC";
-            
-            
             try
             {
-
-
-                if (!Ora.Connect())
+                if (!Pg.Connect())
                 {
-                    throw new Exception("Oracle Connection Error");
+                    throw new Exception("Postgres Connection Error");
                 }
-                f = Ora.removeSqlParam();
-                f = Ora.setSqlCmd(sql, CommandType.Text);
-                f = Ora.addParam(ParameterDirection.Input, "TANTO_CD", Oracle.ManagedDataAccess.Client.OracleDbType.Varchar2, TANTO, 15);
-                f = Ora.addParam(ParameterDirection.Input, "CODE", Oracle.ManagedDataAccess.Client.OracleDbType.Varchar2, KEY_CD, 15);
-                
-                
-
-
-                dt = Ora.cmdExecDt();
+                f = Pg.removeSqlParam();
+                f = Pg.setSqlCmd(sql, CommandType.Text);
+                f = Pg.addParam(ParameterDirection.Input, "TANTO_CD", NpgsqlDbType.Varchar, TANTO, 15);
+                f = Pg.addParam(ParameterDirection.Input, "CODE", NpgsqlDbType.Varchar, KEY_CD, 15);
+                dt = Pg.cmdExecDt();
                 if (dt.Rows.Count > 0)
                 {
                     Array.Resize(ref GN, dt.Rows.Count);
@@ -809,13 +763,8 @@ namespace BXWebService
             }
             finally
             {
-                Ora.Disconnect();
+                Pg.Disconnect();
             }
-
-
-
-
-
             return GN;
         }        
         [WebMethod]
@@ -863,14 +812,14 @@ namespace BXWebService
 
 
         }
-        private string LOC_NO_EDIT_ADD(ref cls_OraIf OraDb, string LOC_NO)
+        private string LOC_NO_EDIT_ADD(ref cls_PgsqlIf Pg, string LOC_NO)
         {
             string LOC_EDIT = string.Empty;
             string sql = "SELECT LOC_NO_EDIT_ADD(:LOC_NO) as LOC_EDIT FROM DUAL";
-            OraDb.removeSqlParam();
-            OraDb.setSqlCmd(sql, CommandType.Text);
-            OraDb.addParam(ParameterDirection.Input, "LOC_NO", Oracle.ManagedDataAccess.Client.OracleDbType.Varchar2, LOC_NO, 13);
-            LOC_EDIT = OraDb.getDirectValue();
+            Pg.removeSqlParam();
+            Pg.setSqlCmd(sql, CommandType.Text);
+            Pg.addParam(ParameterDirection.Input, "LOC_NO", NpgsqlDbType.Varchar, LOC_NO, 13);
+            LOC_EDIT = Pg.getDirectValue();
             return LOC_EDIT;
         }
     }
