@@ -31,8 +31,6 @@ namespace BXWebService.HTS
             cls_PgsqlIf Pg = new cls_PgsqlIf();
             Boolean f = false;
 
-           
-
 
             string ret = string.Empty;
             //string sql = "BEGIN  SP_REG_KOFUKU(:pi_jan_cd,:pi_konpo_d,:pi_konpo_w,:pi_konpo_h,:pi_konpo_wght,:po_ret);  END;";
@@ -41,7 +39,8 @@ namespace BXWebService.HTS
             {
                 if (!Pg.Connect())
                 {
-                    throw new Exception("Oracle Connection Error");
+                    throw new Exception("Postgres Connection Error");
+                    
                 }
 
                 Pg.removeSqlParam();

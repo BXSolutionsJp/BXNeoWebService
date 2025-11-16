@@ -7,7 +7,7 @@ namespace BXWebService
 {
     public class cls_PgsqlIf
     {
-        private string connString = "host=localhost;port=5432;database=postgres;username=postgres;password=password";
+        private string connString = "host=localhost;port=5434;database=postgres;username=postgres;password=postgres";
         private NpgsqlConnection _con;
         private NpgsqlTransaction _trn;
         private NpgsqlCommand _cmd;
@@ -20,6 +20,7 @@ namespace BXWebService
         public Boolean Connect()
         {
             Boolean f = true;
+
             if (_con == null)
             {
                 _con = new NpgsqlConnection(connString);
@@ -127,23 +128,32 @@ namespace BXWebService
         public Boolean addParam(ParameterDirection Direction, string ParameterName, NpgsqlDbType ParameterType, string ParameterValue = "", int ParameterSize = 0)
         {
             Boolean f = true;
+            NpgsqlParameter param;
             try
             {
                 if (ParameterType == NpgsqlDbType.Char || ParameterType == NpgsqlDbType.Varchar || ParameterType == NpgsqlDbType.Numeric || ParameterType == NpgsqlDbType.Varbit || ParameterType == NpgsqlDbType.Bit)
                 {
                     if (ParameterSize > 0)
                     {
-                        _cmd.Parameters.Add(ParameterName, ParameterType, ParameterSize);
+                        param = _cmd.Parameters.Add(ParameterName, ParameterType, ParameterSize);
                     }
                     else
                     {
-                        _cmd.Parameters.Add(ParameterName, ParameterType);
+                        param = _cmd.Parameters.Add(ParameterName, ParameterType);
                     }
                 }
                 else
                 {
-                    _cmd.Parameters.Add(ParameterName, ParameterType);
+                    param = _cmd.Parameters.Add(ParameterName, ParameterType);
                 }
+
+                param.Direction = Direction;
+
+                if (Direction != ParameterDirection.Output)
+                {
+                    param.Value = ParameterValue;
+                }
+                
             }
             catch (Exception ex)
             {

@@ -4,10 +4,8 @@ using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using Oracle.ManagedDataAccess.Client;
 using System.Web.Services;
 using System.Data;
-
 
 
 namespace BXWebService.HTS

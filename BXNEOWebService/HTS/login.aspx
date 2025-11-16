@@ -9,17 +9,16 @@
 <title></title>
 <script type="text/javascript">
 
-function   ChkSubmit(f){
-    if (f.getElementById("UserPass").value == "") {
-        return false;
+function ChkSubmit(f) {
+    const pass = document.getElementById("UserPass");
+    if (pass == "") {
+    return false;
     } else {
         return true;
     }
 }
-
-
        
-    </script>
+</script>
 </head>
 <body>
 <div class="page">
@@ -77,4 +76,3 @@ function   ChkSubmit(f){
     </div>   
 </body>
 </html>
-

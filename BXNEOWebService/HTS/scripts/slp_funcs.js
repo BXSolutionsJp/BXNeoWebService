@@ -2,8 +2,6 @@
 function GetTantoNm() {
     var tantoCd = document.getElementById("TANTO_CD").value;
 
-
-
     if (tantoCd == "") {
         Ht.ShowErrorMessage("担当コードを入力してください。");
         return false;
@@ -19,10 +17,9 @@ function GetTantoNm() {
 }
 function GetTantoNm_callBack(r) {
 
-
     if (r == null) {
         Ht.ShowErrorMessage("無効な担当コードです。");
-        document.getElementById("TANTO_CD").value = "";
+        // document.getElementById("TANTO_CD").value = "";
 
         return;
     }

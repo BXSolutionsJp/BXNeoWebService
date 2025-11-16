@@ -16,7 +16,7 @@ namespace BXWebService
     [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
     [System.ComponentModel.ToolboxItem(false)]
     // この Web サービスを、スクリプトから ASP.NET AJAX を使用して呼び出せるようにするには、次の行のコメントを解除します。
-    // [System.Web.Script.Services.ScriptService]
+    [System.Web.Script.Services.ScriptService]
     public class BXSoap : System.Web.Services.WebService
     {
         public struct GENERAL{
@@ -27,39 +27,39 @@ namespace BXWebService
             public string VAL_5;
             public string VAL_6;
         }
-        public struct HKATInfo
+        public struct HKATInfo // 入出荷情報
         {
-            public string HKAT_SHIJI_NO;
-            public string OKURIJO_NO;
-            public string NYSHK_DATE;
-            public string QTY;
+            public string HKAT_SHIJI_NO; // 出荷指示番号
+            public string OKURIJO_NO; // 送り状番号
+            public string NYSHK_DATE; // 入荷&出荷日
+            public string QTY; // quantity 数量
         }
-        public struct MoveItem
+        public struct MoveItem // 商品移動
         {
-            public string SOKO_KANRI_CD;
-            public string KYK_SHN_CD;
-            public string GNPN_SHN_CD;
-            public string SHN_NM;
-            public string KOZA;
-            public string ZK_KANRI;
-            public string TANA_ZK_QTY;
+            public string SOKO_KANRI_CD; // 倉庫管理コード
+            public string KYK_SHN_CD; // 商品コード
+            public string GNPN_SHN_CD; // 商品コード?
+            public string SHN_NM; // 商品名
+            public string KOZA; // 口座番号
+            public string ZK_KANRI; // 在庫の管理区分
+            public string TANA_ZK_QTY; // 在庫の数量
         }
-        public struct KofukuInfo
+        public struct KofukuInfo // 梱包用
         {
-            public string KYK_SHN_CD;
-            public string JAN_CD;
-            public string KONPO_W;
-            public string KONPO_D;
-            public string KONPO_H;
-            public string KONPO_WGHT;
+            public string KYK_SHN_CD; // 商品コード
+            public string JAN_CD; // JANコード
+            public string KONPO_W; // 梱包幅
+            public string KONPO_D; // 梱包奥行き?
+            public string KONPO_H; // 梱包高さ
+            public string KONPO_WGHT; // 梱包重量
         }
-        public struct MoveFIFO
+        public struct MoveFIFO // 商品移動
         {
-            public string RTN;
-            public string RTN_QTY;
-            public string KYK_SHN_CD;
-            public string MOT_LOC;
-            public string SAKI_LOC;
+            public string RTN; // id
+            public string RTN_QTY; // 移動数量
+            public string KYK_SHN_CD; // 移動する商品コード
+            public string MOT_LOC; // 移動元ロケーション
+            public string SAKI_LOC; // 移動先ロケーション
         }        
         [WebMethod]
         public string RegSeraialCopy(string PrtLocID, string PrtCnt, string SerialNo)
