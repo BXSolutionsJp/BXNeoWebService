@@ -161,7 +161,7 @@ namespace BXWebService
         public string isLocationExists(string SOKO_KANRI_CD, string LOC_EDIT)
         {
             string  ret=string.Empty;
-            string sql = @"SELECT CAST(COUNT(*) as  varchar2(10)) as CNT
+            string sql = @"SELECT CAST(COUNT(*) as  VARCHAR(10)) as CNT
                             FROM BLKAREA, AREA, NNSSOK, LOCATION
                             WHERE BLKAREA.AREA_NO = AREA.AREA_NO
                                 AND AREA.SOKO_CD = NNSSOK.NNS_SOKO_CD 
