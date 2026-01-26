@@ -157,6 +157,16 @@ namespace BXWebService
 
 
         }
+        /// <summary>
+        /// 倉庫管理コードとロケーションコードからロケーションが存在するかを確認する
+        /// BLKAREA: 倉庫内の各エリアのブロックを定義する
+        /// AREA: 倉庫内のエリアを定義する
+        /// NNSSOK: 荷主毎の倉庫を定義する
+        /// LOCATION: ロケーションの属性を定義する
+        /// </summary>
+        /// <param name="SOKO_KANRI_CD">倉庫管理コード</param>
+        /// <param name="LOC_EDIT">ロケーションコード</param>
+        /// <returns>ロケーションの数を返す</returns>
         [WebMethod]
         public string isLocationExists(string SOKO_KANRI_CD, string LOC_EDIT)
         {
@@ -194,12 +204,17 @@ namespace BXWebService
 
             return ret;
         }
+        /// <summary>
+        /// JANCODE(12桁)もしくは客先商品コード(12桁以外)を入力で受け取り、商品テーブルから商品に関する情報を取得する
+        /// SHN: 受託商品の属性を定義する。主に容積、重量など
+        /// </summary>
+        /// <param name="KEY">JANCODEもしくは客先商品コード</param>
+        /// <returns>客先商品コード、JANCODE、梱包長さ、幅、高さ、重さの6種類の商品情報</returns>
         [WebMethod]
         public KofukuInfo getKofukuInfo(string KEY)
         {
 
             KofukuInfo ki = new KofukuInfo();
-            
 
             
             cls_PgsqlIf Pg = new cls_PgsqlIf();
@@ -240,6 +255,15 @@ namespace BXWebService
             }
             return ki;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="SOKO_KANRI_CD"></param>
+        /// <param name="SHN_CD"></param>
+        /// <param name="LOC_NO"></param>
+        /// <param name="KOZA"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         [WebMethod]
         public MoveItem GetMoveData(string SOKO_KANRI_CD, string SHN_CD, string LOC_NO, string KOZA)
        {
@@ -436,6 +460,11 @@ namespace BXWebService
 
             return TANTO_NM;
         }
+        /// <summary>
+        /// 商品マスターをチェックして、無ければ空文字を返す
+        /// </summary>
+        /// <param name="TANTO_CD"></param>
+        /// <returns>商品マスターにデータがあれば担当コードが、なければ空文字列が返る</returns>
         [WebMethod]
         public string getTantoNmStored(string TANTO_CD)
         {
@@ -491,7 +520,7 @@ namespace BXWebService
             try
             {
                 if (!Pg.Connect()) throw new System.Exception("Postgres Connection Error");
-                f = Pg.setSqlCmd("pack_lip.proc_LipStore_End", CommandType.StoredProcedure);
+                f = Pg.setSqlCmd("pack_lip__proc_LipStore_End", CommandType.StoredProcedure);
                 f = Pg.addParam(ParameterDirection.Input, "p_hkat_shiji_no", NpgsqlDbType.Varchar, HKAT_SHIJI_NO, 15);
                 f = Pg.addParam(ParameterDirection.Input, "p_qty", NpgsqlDbType.Numeric, QTY);
                 f = Pg.addParam(ParameterDirection.Input, "p_loc_no", NpgsqlDbType.Varchar, LOC_NO, 15);
