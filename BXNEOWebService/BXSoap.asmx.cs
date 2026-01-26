@@ -212,7 +212,7 @@ namespace BXWebService
 
                 Pg.removeSqlParam();
                 Pg.setSqlCmd("SP_GET_KOFUKU", CommandType.StoredProcedure);
-                Pg.addParam(ParameterDirection.Input, "KEY", NpgsqlDbType.Varchar, KEY, 13);
+                Pg.addParam(ParameterDirection.Input, "key_cd", NpgsqlDbType.Varchar, KEY, 13);
                 Pg.addParam(ParameterDirection.Output, "po_kyk_shn_cd", NpgsqlDbType.Varchar, "", 20);
                 Pg.addParam(ParameterDirection.Output, "po_jan_cd", NpgsqlDbType.Varchar, "", 13);
                 Pg.addParam(ParameterDirection.Output, "po_konpo_d", NpgsqlDbType.Integer);
