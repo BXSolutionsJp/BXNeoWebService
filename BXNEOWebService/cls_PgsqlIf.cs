@@ -127,6 +127,11 @@ namespace BXWebService
 
         public Boolean addParam(ParameterDirection Direction, string ParameterName, NpgsqlDbType ParameterType, string ParameterValue = "", int ParameterSize = 0)
         {
+            return addParam(Direction, ParameterName, ParameterType, (object)ParameterValue, ParameterSize);
+        }
+
+        public Boolean addParam(ParameterDirection Direction, string ParameterName, NpgsqlDbType ParameterType, object ParameterValue, int ParameterSize = 0)
+        {
             Boolean f = true;
             NpgsqlParameter param;
             try

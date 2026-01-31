@@ -174,7 +174,7 @@ namespace BXWebService
             string sql = @"SELECT CAST(COUNT(*) as  VARCHAR(10)) as CNT
                             FROM BLKAREA, AREA, NNSSOK, LOCATION
                             WHERE BLKAREA.AREA_NO = AREA.AREA_NO
-                                AND AREA.SOKO_CD = NNSSOK.NNS_SOKO_CD 
+                                AND AREA.SOKO_CD::INTEGER = NNSSOK.NNS_SOKO_CD::INTEGER
                                 AND SOKO_KANRI_CD = :SOKO_KANRI_CD
                                 AND LOCATION.LOC_NO	BETWEEN FROM_LOC_NO AND TO_LOC_NO
                                 AND LOCATION.LOC_NO   = LOC_NO_EDIT_ADD(:LOC_EDIT)";
@@ -205,7 +205,7 @@ namespace BXWebService
             return ret;
         }
         /// <summary>
-        /// JANCODE(12桁)もしくは客先商品コード(12桁以外)を入力で受け取り、商品テーブルから商品に関する情報を取得する
+        /// JANCODE(12桁)もしくは客先商品コード(12桁以外)を入力し、商品テーブルから商品に関する情報を取得する
         /// SHN: 受託商品の属性を定義する。主に容積、重量など
         /// </summary>
         /// <param name="KEY">JANCODEもしくは客先商品コード</param>
@@ -256,13 +256,13 @@ namespace BXWebService
             return ki;
         }
         /// <summary>
-        /// 
+        /// 指定した倉庫・商品・ロケーション・口座に該当する在庫情報を1件取得する
         /// </summary>
         /// <param name="SOKO_KANRI_CD"></param>
         /// <param name="SHN_CD"></param>
         /// <param name="LOC_NO"></param>
         /// <param name="KOZA"></param>
-        /// <returns></returns>
+        /// <returns>移動する商品のデータ</returns>
         /// <exception cref="Exception"></exception>
         [WebMethod]
         public MoveItem GetMoveData(string SOKO_KANRI_CD, string SHN_CD, string LOC_NO, string KOZA)
@@ -277,7 +277,9 @@ namespace BXWebService
                             SUM(TANA_ZK_QTY) as TANA_ZK_QTY
                         
                         FROM NNSSOK,SHN,GNPNZAIKO   
-                        WHERE (SHN.KYK_SHN_CD = :kyk_shn_cd) AND (GNPNZAIKO.SHN_CD =SHN.SHN_CD) AND (NNSSOK.NNS_SOKO_SEQ = SUBSTR(GNPNZAIKO.GNPN_SHN_CD,4,3)) AND NNSSOK.SOKO_KANRI_CD = :soko_kanri_cd
+                        WHERE (SHN.KYK_SHN_CD = :kyk_shn_cd) AND (GNPNZAIKO.SHN_CD =SHN.SHN_CD) 
+                            AND (NNSSOK.NNS_SOKO_SEQ = SUBSTR(GNPNZAIKO.GNPN_SHN_CD,4,3)) 
+                            AND NNSSOK.SOKO_KANRI_CD = :soko_kanri_cd
                             AND LOC_NO = LOC_NO_EDIT_ADD(:loc_no) AND KOZA LIKE :koza
                         GROUP BY NNSSOK.SOKO_KANRI_CD,SHN.KYK_SHN_CD,GNPNZAIKO.GNPN_SHN_CD,SHN.SHN_NM,GNPNZAIKO.KOZA  ";
 
@@ -368,6 +370,11 @@ namespace BXWebService
 
             return gn;
         }
+        /// <summary>
+        /// 指定した商品コードに該当する入庫情報を配列で取得する
+        /// </summary>
+        /// <param name="shnCd"></param>
+        /// <returns></returns>
         [WebMethod]
         public HKATInfo[] GetNyukoList(string shnCd)
         {
@@ -389,8 +396,6 @@ namespace BXWebService
 
             try
             {
-
-
                 if (!Pg.Connect())
                 {
                     throw new Exception("Postgres Connection Error");
@@ -543,7 +548,7 @@ namespace BXWebService
             return ret;
         }        
         [WebMethod]
-        public MoveFIFO MoveZaikoFIFO(string GNPN_SHN_CD,string KYK_SHN_CD,  string KOZA, string MOTO_LOC, string SAKI_LOC, string QTY, string TANTO_CD)
+        public MoveFIFO MoveZaikoFIFO(string GNPN_SHN_CD,string KYK_SHN_CD,  string KOZA, string MOTO_LOC, string SAKI_LOC, int QTY, string TANTO_CD)
         {
             MoveFIFO Ret = new MoveFIFO();
             string TANTO = string.Empty;
@@ -557,9 +562,8 @@ namespace BXWebService
             try
             {
                 if (!Pg.Connect()) throw new System.Exception("Postgres Connection Error");
-                // LOC_NO_EDIT_ADD の Pg 版が必要
-                MOT_LOC_ADD = MOTO_LOC; // LOC_NO_EDIT_ADD(ref Pg, MOTO_LOC); // 実装に応じて修正
-                SAKI_LOC_ADD = SAKI_LOC; // LOC_NO_EDIT_ADD(ref Pg, SAKI_LOC); // 実装に応じて修正
+                MOT_LOC_ADD = LOC_NO_EDIT_ADD(ref Pg, MOTO_LOC);
+                SAKI_LOC_ADD = LOC_NO_EDIT_ADD(ref Pg, SAKI_LOC);
                 f = Pg.setSqlCmd("SP_FIFO_IDO", CommandType.StoredProcedure, true);
                 f = Pg.addParam(ParameterDirection.Input, "p_gnpn_shn_cd", NpgsqlDbType.Varchar, GNPN_SHN_CD, 36);
                 f = Pg.addParam(ParameterDirection.Input, "p_koza", NpgsqlDbType.Varchar, KOZA, 4);
@@ -606,8 +610,8 @@ namespace BXWebService
             {
                 if (!Pg.Connect()) throw new System.Exception("Postgres Connection Error");
                 // LOC_NO_EDIT_ADD の Pg 版が必要
-                MOT_LOC_ADD = MOTO_LOC; // LOC_NO_EDIT_ADD(ref Pg, MOTO_LOC); // 実装に応じて修正
-                SAKI_LOC_ADD = SAKI_LOC; // LOC_NO_EDIT_ADD(ref Pg, SAKI_LOC); // 実装に応じて修正
+                MOT_LOC_ADD = LOC_NO_EDIT_ADD(ref Pg, MOTO_LOC);
+                SAKI_LOC_ADD = LOC_NO_EDIT_ADD(ref Pg, SAKI_LOC);
                 f = Pg.setSqlCmd("SP_IDO_TANA_ALL", CommandType.StoredProcedure, true);
                 f = Pg.addParam(ParameterDirection.Input, "p_soko_kanri_cd", NpgsqlDbType.Varchar, SOKO_KANRI_CD, 8);
                 f = Pg.addParam(ParameterDirection.Input, "p_koza", NpgsqlDbType.Varchar, KOZA, 4);                
@@ -681,6 +685,11 @@ namespace BXWebService
             }
             return ret;
         }
+        /// <summary>
+        /// JANコードから客先商品コードへの変換を行う。入力が客先商品コードならそのまま返す
+        /// </summary>
+        /// <param name="JanCode"></param>
+        /// <returns></returns>
         [WebMethod]
         public string strJanToKykShnCd(string JanCode)
         {
@@ -709,6 +718,11 @@ namespace BXWebService
             }
             return kykShnCd;
         }
+        /// <summary>
+        /// 客先商品コードまたはJANコードのうちどちらかをキーにして両方取得するAPI
+        /// </summary>
+        /// <param name="KEY_CD"></param>
+        /// <returns></returns>
         [WebMethod]
         public GENERAL getShnCdFromKEY(string KEY_CD)
         {
@@ -722,7 +736,7 @@ namespace BXWebService
                 }
                 Boolean f =  Pg.removeSqlParam();
                 f = Pg.setSqlCmd("SP_GETSHN_CD_FROMKEY", CommandType.StoredProcedure);
-                f = Pg.addParam(ParameterDirection.Input, "KEY_CD", NpgsqlDbType.Varchar, KEY_CD, 13);
+                f = Pg.addParam(ParameterDirection.Input, "key_cd", NpgsqlDbType.Varchar, KEY_CD, 13);
                 f = Pg.addParam(ParameterDirection.Output, "po_kyk_shn_cd", NpgsqlDbType.Varchar, "", 15);
                 f = Pg.addParam(ParameterDirection.Output, "po_jan_cd", NpgsqlDbType.Varchar, "", 15);
                 f = Pg.cmdExec();
@@ -742,6 +756,12 @@ namespace BXWebService
             }
             return gn;
         }
+        /// <summary>
+        /// 指定した商品（KEY_CD）と担当者（TANTO）に紐づく在庫が存在する棚の一覧を取得する
+        /// </summary>
+        /// <param name="KEY_CD">商品コード</param>
+        /// <param name="TANTO">担当者コード。実質ユーザーの識別子</param>
+        /// <returns></returns>
         [WebMethod]
         public GENERAL[] GETSUISHOLOC(string KEY_CD, string TANTO)
         {
