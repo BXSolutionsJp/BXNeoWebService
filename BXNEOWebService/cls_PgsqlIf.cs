@@ -7,7 +7,7 @@ namespace BXWebService
 {
     public class cls_PgsqlIf
     {
-        private string connString = "host=localhost;port=5434;database=postgres;username=postgres;password=postgres";
+        private string connString = "host=localhost;port=5434;database=SLPDB2;username=postgres;password=postgres";
         private NpgsqlConnection _con;
         private NpgsqlTransaction _trn;
         private NpgsqlCommand _cmd;
