@@ -1,11 +1,13 @@
-﻿using System;
+﻿using Npgsql;
+using NpgsqlTypes;
+using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Web;
 using System.Web.Services;
-using System.Data;
-using NpgsqlTypes;
-using Npgsql;
+using System.Web.Services.Protocols;
 
 namespace BXWebService
 {
@@ -501,9 +503,31 @@ namespace BXWebService
             }
             return tanto_nm;
         }
+
         [WebMethod]
         public string LipStoreEnd(string HKAT_SHIJI_NO, string QTY, string LOC_NO, string TANTO_CD, string LIP_NO = "", string LOT_NO = "", string RSN_CD = "00")
         {
+            // npgsqlに渡す際に引数省略するとなぜかnull扱いになるのでここで改めて代入
+            LIP_NO = LIP_NO ?? "";
+            RSN_CD = RSN_CD ?? "00";
+
+            // TANTO_CD バリデーション
+            if (string.IsNullOrWhiteSpace(TANTO_CD))
+            {
+                throw new Exception("TANTO_CDは必須です。");
+            }
+
+            // QTY バリデーション
+            decimal qty;
+            if (!decimal.TryParse(
+                QTY,
+                NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint,
+                CultureInfo.InvariantCulture,
+                out qty))
+            {
+                throw new Exception("QTYには数値を指定してください。");
+            }
+
             string TANTO = string.Empty;
             if (TANTO_CD.Length <= 8)
             {
@@ -514,10 +538,12 @@ namespace BXWebService
                 TANTO = cls_Func.DecryptString(TANTO_CD, System.DateTime.Now.ToString("yyyyMMdd"));
             }
 
-            if (LOT_NO == "")
+            if (string.IsNullOrEmpty(LOT_NO))
             {
                 LOT_NO = System.DateTime.Now.ToString("yyyyMMdd");
             }
+
+
             cls_PgsqlIf Pg = new cls_PgsqlIf();
             Boolean f = false;
             string ret = string.Empty;
@@ -527,19 +553,31 @@ namespace BXWebService
                 if (!Pg.Connect()) throw new System.Exception("Postgres Connection Error");
                 f = Pg.setSqlCmd("pack_lip__proc_LipStore_End", CommandType.StoredProcedure);
                 f = Pg.addParam(ParameterDirection.Input, "p_hkat_shiji_no", NpgsqlDbType.Varchar, HKAT_SHIJI_NO, 15);
-                f = Pg.addParam(ParameterDirection.Input, "p_qty", NpgsqlDbType.Numeric, QTY);
+                f = Pg.addParam(ParameterDirection.Input, "p_qty", NpgsqlDbType.Numeric, qty);
                 f = Pg.addParam(ParameterDirection.Input, "p_loc_no", NpgsqlDbType.Varchar, LOC_NO, 15);
                 f = Pg.addParam(ParameterDirection.Input, "p_lip_no", NpgsqlDbType.Varchar, LIP_NO, 15);
                 f = Pg.addParam(ParameterDirection.Input, "p_lot_no", NpgsqlDbType.Varchar, LOT_NO, 64);
                 f = Pg.addParam(ParameterDirection.Input, "p_rsn_cd", NpgsqlDbType.Varchar, RSN_CD, 6);
                 f = Pg.addParam(ParameterDirection.Input, "p_upd_tanto_cd", NpgsqlDbType.Varchar, TANTO, 8);
                 f = Pg.addParam(ParameterDirection.Output, "p_rc", NpgsqlDbType.Varchar, "", 2);
-                f = Pg.cmdExec();
-                ret = Pg.getParameter("p_rc").ToString().Trim();
+
+                if (!Pg.cmdExec())
+                {
+                    throw new Exception("DB処理に失敗しました。");
+                }
+
+                ret = Pg.getParameter("p_rc").Trim();
+
+                if (string.IsNullOrEmpty(ret))
+                {
+                    throw new Exception("DB処理の結果が返されませんでした。");
+                }
+
             }
             catch (Exception ex)
             {
                 ErrLog.logger.log(ex);
+                throw;
             }
             finally
             {
