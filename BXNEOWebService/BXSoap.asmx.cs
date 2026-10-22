@@ -119,7 +119,7 @@ namespace BXWebService
             {
                 if (!clsCmd.Connect())
                 {
-                    throw new Exception("Postgres Connection Error");
+                    throw new Exception("MSSQL Connection Error");
                 }
                 clsCmd.removeSqlParam();
                 clsCmd.setSqlCmd("sp_Reg_HaikiShip");
@@ -207,7 +207,7 @@ namespace BXWebService
             return ret;
         }
         /// <summary>
-        /// JANCODE(12桁)もしくは客先商品コード(12桁以外)を入力し、商品テーブルから商品に関する情報を取得する
+        /// JANCODE(13桁。12桁なら先頭に0を補う)もしくは客先商品コード(12桁・13桁以外)を入力し、商品テーブルから商品に関する情報を取得する
         /// SHN: 受託商品の属性を定義する。主に容積、重量など
         /// </summary>
         /// <param name="KEY">JANCODEもしくは客先商品コード</param>
@@ -468,7 +468,7 @@ namespace BXWebService
             return TANTO_NM;
         }
         /// <summary>
-        /// 商品マスターをチェックして、無ければ空文字を返す
+        /// 担当者マスター(TANTO)をSP_GET_TANTO_NMで検索し、担当者名を返す。該当がなければ空文字を返す
         /// </summary>
         /// <param name="TANTO_CD"></param>
         /// <returns>商品マスターにデータがあれば担当コードが、なければ空文字列が返る</returns>
