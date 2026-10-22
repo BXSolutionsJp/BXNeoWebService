@@ -392,7 +392,7 @@ namespace BXWebService
                                 "AND KOTEIPROC.PROC_KBN = 'H' " +
                                 "AND ( HKATSHIJI.STS BETWEEN   KOTEIPROC.MIN_STS AND KOTEIPROC.MAX_STS ) " +
                                 "AND HKATSHIJI.SGY_SHIJI_NO = SGYSHIJI.SGY_SHIJI_NO " +
-                                "AND (SHN.KYK_SHN_CD LIKE '" + shnCd + "%' OR  SHN.JAN_CD = '" + shnCd + "')";
+                                "AND (SHN.KYK_SHN_CD LIKE (:shn_cd || '%') OR SHN.JAN_CD = :shn_cd)";
             cls_PgsqlIf Pg = new cls_PgsqlIf();
             DataTable dt = new DataTable();
 
@@ -405,7 +405,7 @@ namespace BXWebService
 
                 Pg.removeSqlParam();
                 Pg.setSqlCmd(sql, CommandType.Text);
-                //Ora.addParam(ParameterDirection.Input, "kyk_shn_cd", Oracle.ManagedDataAccess.Client.OracleDbType.Varchar2, shnCd, 13);
+                Pg.addParam(ParameterDirection.Input, "shn_cd", NpgsqlDbType.Varchar, shnCd ?? "", 0);
 
 
                 dt = Pg.cmdExecDt();

@@ -5,6 +5,7 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.Data;
+using NpgsqlTypes;
 
 namespace BXWebService.HTS
 {
@@ -51,7 +52,7 @@ namespace BXWebService.HTS
                             "FROM NNSSOK LEFT JOIN (  " +
                                 "SELECT NVL(NNSSOK.SOKO_KANRI_CD, '0001') AS SOKO_KANRI_CD " +
                                 "FROM NNSSOK INNER JOIN TANTO ON     TANTO.SOKO_CD = NNSSOK.NNS_SOKO_CD " +
-                                "WHERE TANTO_CD = '" + PlainTanto_CD + "' " +
+                                "WHERE TANTO_CD = :TANTO_CD " +
                             ") v ON NNSSOK.SOKO_KANRI_CD = v.SOKO_KANRI_CD " +
                             "ORDER BY NNSSOK.NNS_SOKO_CD ";
 
@@ -59,6 +60,7 @@ namespace BXWebService.HTS
 
             DataTable li = new DataTable();
             Pg.setSqlCmd(sql, CommandType.Text);
+            Pg.addParam(ParameterDirection.Input, "TANTO_CD", NpgsqlDbType.Varchar, PlainTanto_CD ?? "", 0);
             Pg.ExecuteCmd(ref li);
 
             for (int i = 0; i < li.Rows.Count; i++)
