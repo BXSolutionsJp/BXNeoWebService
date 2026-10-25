@@ -34,6 +34,7 @@
     <script src="./scripts/nyka_store.js" type="text/javascript"></script>
     <div id="main">
       <h2>入庫完了</h2>
+        <a href="../packages.config">../packages.config</a>
         <div class="block">
           <dl class="dataitems">
           <dt>作業指示番号</dt>
@@ -81,7 +82,6 @@
 <input type="hidden" id="f2Action" value="" />
 <input type="hidden" id="f3Action" value="" />
         <div id="footer">
-            <a href="Zaiko_Move.aspx">Zaiko_Move.aspx</a>
             <ul class="fkeyguide">
                 <li class="keyNum"><span>F1</span></li>
                 <li id="KeyF1" class="keydesc">&nbsp;</li>
