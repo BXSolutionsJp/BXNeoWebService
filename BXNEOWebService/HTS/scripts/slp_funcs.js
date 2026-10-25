@@ -19,7 +19,7 @@ function GetTantoNm_callBack(r) {
 
     if (r == null) {
         Ht.ShowErrorMessage("無効な担当コードです。");
-        // document.getElementById("TANTO_CD").value = "";
+        document.getElementById("TANTO_CD").value = "";
 
         return;
     }
