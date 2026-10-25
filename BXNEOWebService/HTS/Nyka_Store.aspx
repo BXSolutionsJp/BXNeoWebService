@@ -34,7 +34,6 @@
     <script src="./scripts/nyka_store.js" type="text/javascript"></script>
     <div id="main">
       <h2>入庫完了</h2>
-        <a href="../packages.config">../packages.config</a>
         <div class="block">
           <dl class="dataitems">
           <dt>作業指示番号</dt>
