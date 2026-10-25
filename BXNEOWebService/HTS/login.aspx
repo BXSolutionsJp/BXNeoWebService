@@ -10,9 +10,8 @@
 <script type="text/javascript">
 
 function ChkSubmit(f) {
-    const pass = document.getElementById("UserPass");
-    if (pass == "") {
-    return false;
+    if (f.getElementById("UserPass").value == "") {
+        return false;
     } else {
         return true;
     }
